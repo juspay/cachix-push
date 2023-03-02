@@ -25,3 +25,7 @@ Then, run:
 ```sh
 nix run .#cachix-push
 ```
+
+## But why?
+
+While pushing to a Nix cache is best done automatically by CI, there are situations where you want to manually do this. Notably, Github Actions CI [doesn't support ARM macOS yet](https://github.com/actions/runner-images/issues/2187) - so to provide a macOS cache to your team, you need to manually push to cachix (or use a different CI service).
