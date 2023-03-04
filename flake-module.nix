@@ -39,14 +39,14 @@
             text = ''
               # Push packages
               echo '## Pushing packages: .#${lib.concatStringsSep ", .#" config.cachix-push.packages} ...'
-              nix build .#${lib.concatStringsSep " .#" config.cachix-push.packages} --json | \
+              nix "$@" build .#${lib.concatStringsSep " .#" config.cachix-push.packages} --json | \
                 jq -r '.[].outputs | to_entries[].value' | \
                 cachix push ${config.cachix-push.cacheName}
               # Push shell
               echo '## Pushing nix shell ...'
               tmpfile=$(mktemp /tmp/dev-profile.XXXXXX)
               rm "$tmpfile"
-              nix develop --profile "$tmpfile" -c echo > /dev/null
+              nix "$@" develop --profile "$tmpfile" -c echo > /dev/null
               cachix push ${config.cachix-push.cacheName} "$tmpfile"
             '';
           });
