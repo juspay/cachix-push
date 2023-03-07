@@ -38,12 +38,17 @@
             ];
             text = ''
               # Push packages
-              echo '## Pushing packages: .#${lib.concatStringsSep ", .#" config.cachix-push.packages} ...'
-              set -x
-              nix "$@" build .#${lib.concatStringsSep " .#" config.cachix-push.packages} --json | \
-                jq -r '.[].outputs | to_entries[].value' | \
-                cachix push ${config.cachix-push.cacheName}
-              set +x
+              ZERO=0
+              if [[ "$ZERO" == "${builtins.toString (builtins.length config.cachix-push.packages)}" ]]; then
+                echo 'No packages to push.'
+              else
+                echo '## Pushing packages: .#${lib.concatStringsSep ", .#" config.cachix-push.packages} ...'
+                set -x
+                nix "$@" build .#${lib.concatStringsSep " .#" config.cachix-push.packages} --json | \
+                  jq -r '.[].outputs | to_entries[].value' | \
+                  cachix push ${config.cachix-push.cacheName}
+                set +x
+              fi
               # Push shell
               echo '## Pushing nix shell ...'
               tmpfile=$(mktemp /tmp/dev-profile.XXXXXX)
