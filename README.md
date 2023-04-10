@@ -1,6 +1,6 @@
 # cachix-push
 
-A flake app that can push all buildable flake outputs (packages, checks and devshells) to cachix
+A flake app that can push all buildable flake outputs (packages, checks and devshells; determined via [flake-outputs](https://github.com/srid/flake-outputs)) to cachix, assuming your flake uses [nix-systems](https://github.com/nix-systems/nix-systems). 
 
 ## Usage
 
