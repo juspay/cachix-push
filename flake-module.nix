@@ -34,7 +34,7 @@
               set -x
               for DRV in $(flake-outputs)
               do
-                nix build "$DRV" | cachix push ${config.cachix-push.cacheName}
+                nix build ".#$DRV" | cachix push ${config.cachix-push.cacheName}
               done
             '';
           });
