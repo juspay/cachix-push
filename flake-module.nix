@@ -1,7 +1,8 @@
+{ flake-outputs }:
 { self, ... }:
 
 {
-  perSystem = { pkgs, lib, config, ... }: {
+  perSystem = { pkgs, system, lib, config, ... }: {
     options = {
       cachix-push = lib.mkOption {
         type = lib.types.submodule {
@@ -10,14 +11,6 @@
               type = lib.types.str;
               description = ''
                 Name of the cachix cache to push to.
-              '';
-            };
-            packages = lib.mkOption {
-              type = lib.types.listOf lib.types.str;
-              # TODO: Why not push ... all packages by default?
-              default = [ "default" ];
-              description = ''
-                Packages to push to cachix.
               '';
             };
           };
@@ -35,28 +28,14 @@
               nix
               cachix
               jq
+              flake-outputs.packages.${system}.default
             ];
             text = ''
-              # Push packages
-              ZERO=0
-              if [[ "$ZERO" == "${builtins.toString (builtins.length config.cachix-push.packages)}" ]]; then
-                echo 'No packages to push.'
-              else
-                echo '## Pushing packages: .#${lib.concatStringsSep ", .#" config.cachix-push.packages} ...'
-                set -x
-                nix "$@" build .#${lib.concatStringsSep " .#" config.cachix-push.packages} --json | \
-                  jq -r '.[].outputs | to_entries[].value' | \
-                  cachix push ${config.cachix-push.cacheName}
-                set +x
-              fi
-              # Push shell
-              echo '## Pushing nix shell ...'
-              tmpfile=$(mktemp /tmp/dev-profile.XXXXXX)
-              rm "$tmpfile"
               set -x
-              nix "$@" develop --profile "$tmpfile" -c echo > /dev/null
-              cachix push ${config.cachix-push.cacheName} "$tmpfile"
-              set +x
+              for DRV in $(flake-outputs)
+              do
+                nix build "$DRV" | cachix push ${config.cachix-push.cacheName}
+              done
             '';
           });
       };

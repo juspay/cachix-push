@@ -1,6 +1,6 @@
 # cachix-push
 
-A flake app that can push packages and devshells to cachix
+A flake app that can push all buildable flake outputs (packages, checks and devshells) to cachix
 
 ## Usage
 
@@ -14,7 +14,6 @@ This is a [flake-parts](https://flake.parts/) module that you can import in your
   perSystem = { ... }: {
     cachix-push = {
       cacheName = "mycache";
-      packages = [ "default" ];
     };
   };
 }
