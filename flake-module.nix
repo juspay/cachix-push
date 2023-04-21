@@ -37,7 +37,7 @@
               set -x
               for DRV in $OUTPUTS
               do
-                nix build ".#$DRV" | cachix push ${config.cachix-push.cacheName}
+                nix build --no-link --no-update-lock-file --print-out-paths ".#$DRV" | cachix push ${config.cachix-push.cacheName}
               done
             '';
           });
