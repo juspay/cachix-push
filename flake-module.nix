@@ -1,4 +1,4 @@
-{ flake-outputs, cachix }:
+{ devour-flake, cachix }:
 { self, ... }:
 
 {
@@ -24,21 +24,13 @@
         program = lib.getExe
           (pkgs.writeShellApplication {
             name = "cachix-push";
-            runtimeInputs = with pkgs; [
-              nix
-              jq
-              flake-outputs.packages.${system}.default
+            runtimeInputs = [
+              (pkgs.callPackage devour-flake { inherit devour-flake; })
               cachix.packages.${system}.cachix
             ];
             text = ''
-              OUTPUTS=$(flake-outputs)
-              echo "Flake outputs to push:"
-              echo "$OUTPUTS"
               set -x
-              for DRV in $OUTPUTS
-              do
-                nix build --no-link --no-update-lock-file --print-out-paths ".#$DRV" | cachix push ${config.cachix-push.cacheName}
-              done
+              devour-flake . "$@" | cachix push ${config.cachix-push.cacheName}
             '';
           });
       };
