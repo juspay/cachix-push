@@ -1,4 +1,4 @@
-{ flake-outputs }:
+{ flake-outputs, cachix }:
 { self, ... }:
 
 {
@@ -26,9 +26,9 @@
             name = "cachix-push";
             runtimeInputs = with pkgs; [
               nix
-              cachix
               jq
               flake-outputs.packages.${system}.default
+              cachix.packages.${system}.cachix
             ];
             text = ''
               OUTPUTS=$(flake-outputs)
