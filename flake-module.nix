@@ -1,4 +1,4 @@
-{ devour-flake, cachix }:
+{ devour-flake }:
 { self, ... }:
 
 {
@@ -26,7 +26,7 @@
             name = "cachix-push";
             runtimeInputs = [
               (pkgs.callPackage devour-flake { })
-              cachix.packages.${system}.cachix
+              pkgs.cachix
             ];
             text = ''
               set -x
