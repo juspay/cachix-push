@@ -25,7 +25,7 @@
           (pkgs.writeShellApplication {
             name = "cachix-push";
             runtimeInputs = [
-              (pkgs.callPackage devour-flake { inherit devour-flake; })
+              (pkgs.callPackage devour-flake { })
               cachix.packages.${system}.cachix
             ];
             text = ''
