@@ -30,7 +30,7 @@
             ];
             text = ''
               set -x
-              devour-flake . "$@" | cachix push ${config.cachix-push.cacheName}
+              devour-flake ${self} "$@" | cachix push ${config.cachix-push.cacheName}
             '';
           });
       };
