@@ -33,3 +33,7 @@ nix run .#cachix-push
 ### Tips
 
 - If you use Apple silicon, but want to push the Intel binaries to cache, run: `nix run .#cachix-push -- --option system x86_64-darwin`.
+
+## Examples
+
+- [Omnix](https://github.com/juspay/omnix/blob/main/nix/modules/cache-pins.nix)
