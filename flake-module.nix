@@ -1,40 +1,58 @@
-{ devour-flake, cachix }:
-{ self, ... }:
+{ self, pkgs, lib, flake-parts-lib, ... }:
 
+let
+  inherit (flake-parts-lib)
+    mkPerSystemOption;
+in
 {
-  perSystem = { pkgs, system, lib, config, ... }: {
-    options = {
-      cachix-push = lib.mkOption {
-        type = lib.types.submodule {
-          options = {
-            cacheName = lib.mkOption {
-              type = lib.types.str;
-              description = ''
-                Name of the cachix cache to push to.
-              '';
-            };
+  options = {
+    perSystem = mkPerSystemOption ({ config, self', pkgs, system, ... }: {
+      options = {
+        cachix-push = {
+          package = lib.mkOption {
+            type = lib.types.package;
+            description = ''
+              The cachix package to use
+            '';
+            default = pkgs.cachix;
+          };
+          cacheName = lib.mkOption {
+            type = lib.types.str;
+            description = ''
+              The name of the cachix cache to push to
+            '';
+          };
+          pathsToCache = lib.mkOption {
+            type = lib.types.attrsOf lib.types.path;
+            description = ''
+              Store paths to push to/pin in a Nix cache (such as cachix)
+
+              When pinning, the path will be pinned as `''${key}-''${system}` in the cache, where `key` is the attrset key.
+            '';
           };
         };
       };
-    };
-    config = {
-      # A script to push to cachix
-      apps.cachix-push = {
-        type = "app";
-        program = lib.getExe
-          (pkgs.writeShellApplication {
-            name = "cachix-push";
-            runtimeInputs = [
-              (pkgs.callPackage devour-flake { })
-              cachix.packages.${system}.cachix
-            ];
+
+      config = {
+        apps.cachix-push.program =
+          let
+            inherit (config.cachix-push) package pathsToCache cacheName;
+          in
+          pkgs.writeShellApplication {
+            name = "cachix-push-and-pin";
+            meta.description = ''
+              Run `cachix push` & `cachix pin` for each path in `cache-pins.pathsToCache`
+            '';
+            runtimeInputs = [ package ];
             text = ''
               set -x
-              devour-flake ${self} "$@" | cachix push ${config.cachix-push.cacheName}
+              cachix push ${cacheName} ${lib.concatStringsSep " " (lib.attrValues pathsToCache)}
+              ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: path: ''
+                cachix pin ${cacheName} ${name}-${system} ${path}
+              '') pathsToCache)}
             '';
-          });
+          };
       };
-    };
+    });
   };
 }
-

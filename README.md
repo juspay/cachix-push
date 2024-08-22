@@ -1,6 +1,6 @@
 # cachix-push
 
-A flake app that can push all buildable flake outputs (determined via [devour-flake](https://github.com/srid/devour-flake)) to cachix.
+A flake-parts module to push flake outputs to cachix and then pin them.
 
 ## Usage
 
@@ -11,9 +11,14 @@ This is a [flake-parts](https://flake.parts/) module that you can import in your
   imports = [
     inputs.cachix-push.flakeModule
   ];
-  perSystem = { ... }: {
+  perSystem = { self', ... }: {
     cachix-push = {
       cacheName = "mycache";
+      pathsToCache = {
+        cli = self'.packages.myapp-cli;
+        gui = self'.packages.myapp-gui;
+        devshell = self'.devShells.default;
+      };
     };
   };
 }
