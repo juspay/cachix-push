@@ -4,7 +4,7 @@ A flake-parts module to push flake outputs to cachix and then pin them.
 
 ## Usage
 
-This is a [flake-parts](https://flake.parts/) module that you can import in your `flake.nix` and use:
+This is a [flake-parts](https://flake.parts/) module that you can import in your `flake.nix` and use. The following will create flake app that, when run, will push (and pin) _only_ those three paths (two packages and one devShell) to `mycache.cachix.org`.
 
 ```nix
 {
