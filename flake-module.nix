@@ -22,6 +22,15 @@ in
               The name of the cachix cache to push to
             '';
           };
+          pinPrefix = lib.mkOption {
+            type = lib.types.str;
+            description = ''
+              The prefix to use when pinning paths in the cache
+
+              This is useful when sharing the same cache across multiple projects
+            '';
+            default = "";
+          };
           pathsToCache = lib.mkOption {
             type = lib.types.attrsOf lib.types.path;
             description = ''
@@ -36,7 +45,7 @@ in
       config = {
         apps.cachix-push =
           let
-            inherit (config.cachix-push) package pathsToCache cacheName;
+            inherit (config.cachix-push) package pinPrefix pathsToCache cacheName;
           in
           rec {
             inherit (program) meta;
@@ -50,7 +59,7 @@ in
                 set -x
                 cachix push ${cacheName} ${lib.concatStringsSep " " (lib.attrValues pathsToCache)}
                 ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: path: ''
-                  cachix pin ${cacheName} ${name}-${system} ${path}
+                  cachix pin ${cacheName} ${pinPrefix}${name}-${system} ${path}
                 '') pathsToCache)}
               '';
             };
