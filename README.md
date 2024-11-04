@@ -1,39 +1,21 @@
 # cachix-push
 
-A flake-parts module to push flake outputs to cachix and then pin them.
+A flake app to **push and pin** multiple store paths [built by Omnix](https://omnix.page/om/ci.html) to cachix. Better than `nix build ... | cachix push ...`.
+
+When you pin paths, they are indexed by `system` and custom `prefix` (usually git branch). In CI, you can do this only from say `main` branch, thus having up-to-date cache for your primary branch and have it pinned.
 
 ## Usage
 
-This is a [flake-parts](https://flake.parts/) module that you can import in your `flake.nix` and use. The following will create flake app that, when run, will push (and pin) _only_ those three paths (two packages and one devShell) to `mycache.cachix.org`.
-
-```nix
-{
-  imports = [
-    inputs.cachix-push.flakeModule
-  ];
-  perSystem = { self', ... }: {
-    cachix-push = {
-      cacheName = "mycache";
-      pathsToCache = {
-        cli = self'.packages.myapp-cli;
-        gui = self'.packages.myapp-gui;
-        devshell = self'.devShells.default;
-      };
-    };
-  };
-}
-```
-
-Then, run:
+Push and pin all store paths built by [`om ci`](https://omnix.page/om/ci.html).
 
 ```sh
-nix run .#cachix-push
+# First, build the flake.
+om ci run --results=om.json
+
+# Push to https://mycache.cachix.org
+nix run github:juspay/cachix-push -- --cache mycache --subflake ROOT --prefix "$(git branch --show-current)" < om.json
 ```
-
-### Tips
-
-- If you use Apple silicon, but want to push the Intel binaries to cache, run: `nix run .#cachix-push -- --option system x86_64-darwin`.
 
 ## Examples
 
-- [Omnix](https://github.com/juspay/omnix/blob/main/nix/modules/cache-pins.nix)
+- https://github.com/juspay/omnix/pull/340
