@@ -19,13 +19,18 @@ pog.pog {
       description = "The prefix to use in conjunction with system string when pinning paths";
       argument = "PREFIX";
     }
+    {
+      name = "names";
+      description = "The list of derivation names to do whitelisted cachix push and pin";
+      argument = "NAMES";
+    }
   ];
   runtimeInputs = [ jq cachix git ];
   strict = true;
   script = helpers: ''
     blue "Parsing omnix JSON (subflake=$subflake)"
-     
-    STORE_PATHS=$(jq -r --arg prefix "$prefix" --arg name "$subflake" -f ${./script.jq})
+
+    STORE_PATHS=$(jq -r --arg prefix "$prefix" --arg subflake "$subflake" --arg derivations "$names" -f ${./script.jq})
 
     green "Pushing to https://''${cache}.cachix.org"
     echo "$STORE_PATHS" | jq -r --arg cache "$cache" '"cachix push \($cache) \(values | join(" "))"' | sh
